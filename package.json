@@ -1,0 +1,78 @@
+{
+  "name": "dsh-voice",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness 语音输入插件:麦克风 → 本地/浏览器识别 → 文本进会话(纯输入,与 agent preset 解耦)",
+  "type": "module",
+  "main": "./lib/index.js",
+  "types": "./lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime"
+      ],
+      "platform": "web"
+    }
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.18",
+    "react": "^19.2.8",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "build": "node -e \"require('fs').rmSync('lib',{recursive:true,force:true})\" && tsc -p tsconfig.json && tsdown --config tsdown.config.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "allowScripts": {
+    "esbuild": true
+  },
+  "files": [
+    "lib/**/*",
+    "cordis.patch.yml",
+    "USAGE.md",
+    "tools/"
+  ],
+  "dependencies": {
+    "sherpa-onnx-node": "^1.13.5"
+  },
+  "license": "MIT",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "voice",
+    "speech",
+    "asr",
+    "mic"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "bin": {
+    "dsh-voice-models": "./tools/download-models.cjs"
+  }
+}

@@ -1,0 +1,9 @@
+# 开发期 overlay 示例(路径按你的机器改):
+#   dsh web --patch ./cordis.example.yml
+- insert:
+    - id: voice-host
+      name: '/absolute/path/to/dsh-voice/src/index.ts'
+      inject: [connection]
+    - id: voice
+      name: '/absolute/path/to/dsh-voice/src/client/index.ts'
+      inject: [connection]

@@ -1,0 +1,30 @@
+/**
+ * dsh-voice 线协议:host 半注册 /voice RPC 通道(connection.rpc,loopback authority),
+ * client 半经 connection.rpc.call('/voice', endpoint, payload) 调用。
+ * 纯语音输入:ping(引擎探测)+ asr(PCM → 识别文本)。
+ */
+
+/** /voice.ping: 客户端探测 host 引擎能力(决定用 browser 还是 native 识别)。 */
+export interface VoicePingResponse {
+  /** host 是否可用(通道注册成功即 true) */
+  ok: boolean
+  /** host 是否有 native ASR(模型已就绪) */
+  native: boolean
+}
+
+/** /voice.asr: 一段麦克风 PCM(Int16 16kHz 单声道,base64)。 */
+export interface AsrChunkPayload {
+  sessionId: string
+  audio: string
+  /** 最后一段(触发定稿冲刷) */
+  final: boolean
+}
+
+/** /voice.asr 响应: 增量识别文本;final=true 表示本句定稿。 */
+export interface AsrChunkResponse {
+  delta: string
+  final: boolean
+}
+
+/** 引擎选择(仅识别) */
+export type VoiceEngine = 'browser' | 'native' | 'auto'
