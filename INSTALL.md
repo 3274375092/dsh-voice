@@ -1,5 +1,7 @@
 # dsh-voice 安装指南(面向最终用户)
 
+> 仓库: https://github.com/3274375092/dsh-voice
+
 ## 一键安装(已发布到 npm 后)
 
 ```sh
