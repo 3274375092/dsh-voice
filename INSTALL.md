@@ -9,7 +9,7 @@
 # 1. 安装插件(自动进入 web profile 的 bundles)
 dsh plugin --profile web add @nn12138/dsh-voice
 
-# 2. (可选,想要离线原生识别)安装识别运行时
+# 2. (可选,想要离线原生识别)安装识别运行时(不随插件自动安装)
 dsh plugin --profile web add sherpa-onnx-node
 
 # 2b. (可选)一键下载识别模型(~100MB,zipformer2 中文 + VAD,hf-mirror 源)

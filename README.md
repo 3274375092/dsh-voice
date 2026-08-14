@@ -19,7 +19,7 @@ DeepSeek Harness 的语音输入插件:网页里点 🎤(或按快捷键)说话,
 # 插件本体
 dsh plugin --profile web add @nn12138/dsh-voice
 
-# 可选: 离线原生识别
+# 可选: 离线原生识别(插件本体零依赖,不自动装该运行时)
 dsh plugin --profile web add sherpa-onnx-node
 dsh-voice-models            # 一键下载模型(~100MB)→ ./dsh-voice-models
 

@@ -11,7 +11,7 @@
 dsh plugin --profile web add D:/code/deepseek-harness/scratch-plugin/dsh-voice
 #    ↑ 换成你自己的路径;发布 npm 后就是: dsh plugin --profile web add @nn12138/dsh-voice
 
-# 2. 装原生识别运行时(想要离线识别才需要;浏览器在线识别可跳过)
+# 2. 装原生识别运行时(插件不自动安装;想要离线识别才需要,浏览器在线识别可跳过)
 dsh plugin --profile web add sherpa-onnx-node
 
 # 3. 模型文件(native 识别需要):复用 voxelf 的 assets/models

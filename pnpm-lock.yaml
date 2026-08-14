@@ -20,6 +20,9 @@ importers:
       react:
         specifier: ^19.2.8
         version: 19.2.8
+      sherpa-onnx-node:
+        specifier: ^1.13.5
+        version: 1.13.5
       tsdown:
         specifier: ^0.22.14
         version: 0.22.14(typescript@5.8.2)
@@ -29,10 +32,6 @@ importers:
       vitest:
         specifier: ^3.0.0
         version: 3.2.7(@types/node@24.13.3)
-    optionalDependencies:
-      sherpa-onnx-node:
-        specifier: ^1.13.5
-        version: 1.13.5
 
 packages:
 
@@ -1572,7 +1571,6 @@ snapshots:
       sherpa-onnx-linux-x64: 1.13.5
       sherpa-onnx-win-ia32: 1.13.5
       sherpa-onnx-win-x64: 1.13.5
-    optional: true
 
   sherpa-onnx-win-ia32@1.13.5:
     optional: true
