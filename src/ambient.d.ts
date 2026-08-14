@@ -2,6 +2,7 @@
  * 环境桩:out-of-tree 插件独立 typecheck 用的最小结构类型。
  * 每个声明都标注官方源码出处;仓库内集成构建(tsdown + project references)
  * 会以真实类型替代本文件 —— 桩只保证插件自身逻辑的类型正确性。
+ * 只保留插件实际引用的形状;未引用的桩(dsh-session 事件、apiproxy 等)已删。
  */
 
 // ── @deepseek-ai/cordis(vendor/cordis) ───────────────────────────────
@@ -14,11 +15,7 @@ declare module '@deepseek-ai/cordis' {
   export interface Context {
     readonly logger: Logger
     get<T = unknown>(name: string): T | undefined
-    on<K extends string>(event: K, cb: (...args: any[]) => void): () => void
     effect(disposer: () => unknown, label?: string): () => void
-    provide(name: string, value: unknown): void
-    plugin(plugin: unknown): void
-    inject(names: string[], cb: (scope: Context) => void): void
     [key: string]: unknown
   }
 }
@@ -29,56 +26,14 @@ declare module '@deepseek-ai/schemastery' {
   export class Schema<T = unknown> {
     constructor(options?: Partial<Schema<T>>)
     default(value: T): Schema<T>
-    required(): Schema<T>
     min(n: number): Schema<number>
     static object(shape: Record<string, unknown>): Schema<any>
     static string(): Schema<string>
-    static boolean(): Schema<boolean>
     static const<T extends string>(value: T): Schema<T>
     static union(...schemas: unknown[]): Schema<any>
-    static array(item: unknown): Schema<unknown[]>
     static number(): Schema<number>
-    static natural(): Schema<number>
   }
   export default Schema
-}
-
-// ── @deepseek-ai/dsh-session(packages/core/session) ──────────────────
-// SessionEventMap 节选(types.ts:243-299);chunk 形状见 dsh-llm/types.ts:291-303
-declare module '@deepseek-ai/dsh-session' {
-  export type TextDeltaChunk = { type: 'text-delta'; index: number; text: string }
-  export type StreamChunk =
-    | TextDeltaChunk
-    | { type: 'block-start'; index: number; blockType: string }
-    | { type: 'reasoning-delta'; index: number; text: string }
-    | { type: 'tool-call-delta'; index: number; id: unknown; name?: string; argumentsDelta: string }
-    | { type: 'block-end'; index: number; block: unknown }
-    | { type: 'usage'; usage: unknown }
-    | { type: 'finish'; reason: unknown; replayState?: unknown }
-
-  export interface Session {
-    readonly id: string
-  }
-
-  export type SessionEventMap = {
-    'turn/start': { turn: number }
-    'turn/end': { turn: number; reason: { kind: string } }
-    'assistant/chunk': { turn: number; step: number; chunk: StreamChunk }
-    'assistant/message': { turn: number; step: number; message: unknown }
-    'tool/call': { turn: number; step: number; callId: unknown; name: string; arguments: string }
-    'user/message': unknown
-  }
-
-  export type SessionEvent = {
-    [K in keyof SessionEventMap]: { type: K; seq: number; time: number; data: SessionEventMap[K] }
-  }[keyof SessionEventMap]
-}
-
-// session/event 事件(host 侧 ctx.on;core/session/src/index.ts:76)
-declare module '@deepseek-ai/cordis' {
-  interface Events {
-    'session/event'(session: import('@deepseek-ai/dsh-session').Session, event: import('@deepseek-ai/dsh-session').SessionEvent): void
-  }
 }
 
 // ── @deepseek-ai/dsh-client-connection(packages/client/connection) ───
@@ -87,9 +42,6 @@ declare module '@deepseek-ai/dsh-client-connection' {
   export type ConnectionRpcHandler = (endpoint: string, payload: unknown, signal: AbortSignal) => Promise<RpcResult<unknown>>
   export interface HostConnectionRpc {
     handle(channel: string, handler: ConnectionRpcHandler, options: { authority: 'loopback' | 'trusted-host' }): () => Promise<void>
-  }
-  export interface HostConnectionHandle {
-    readonly rpc: HostConnectionRpc
   }
   export interface ClientConnectionRpc {
     call(channel: string, endpoint: string, payload: unknown, signal?: AbortSignal): Promise<RpcResult<unknown>>
@@ -170,13 +122,6 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
-// ── @deepseek-ai/dsh-host-apiproxy/api(RpcResult,host 用) ────────────
-declare module '@deepseek-ai/dsh-host-apiproxy/api' {
-  export type RpcResult<T> = { ok: true; value: T } | { ok: false; error: { code: string; message: string; details: unknown } }
-}
-
-// ── @deepseek-ai/dsh-session 的 SessionEvent 只读冻结等细节桩不覆盖 ──
-
 // ── Web Speech API(TS lib.dom 缺失;结构来自 MDN) ──────────────────
 interface SpeechRecognitionResult {
   readonly isFinal: boolean
@@ -204,13 +149,6 @@ declare class SpeechRecognition extends EventTarget {
   stop(): void
   abort(): void
 }
-interface Window {
-  SpeechRecognition?: new () => SpeechRecognition
-  webkitSpeechRecognition?: new () => SpeechRecognition
-}
-
-// ── @deepseek-ai/dsh-host-apiproxy(裸入口,仅类型合并占位) ──────────
-declare module '@deepseek-ai/dsh-host-apiproxy' {}
 
 // ── @deepseek-ai/dsh-client-ui-primitives(packages/client/ui-primitives) ─
 declare module '@deepseek-ai/dsh-client-ui-primitives' {

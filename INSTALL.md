@@ -7,7 +7,7 @@
 ```sh
 # 0. 前置: 已安装 DeepSeek Harness CLI(npm i -g @deepseek-ai/dsh 或官方安装方式)
 # 1. 安装插件(自动进入 web profile 的 bundles)
-dsh plugin --profile web add dsh-voice
+dsh plugin --profile web add @nn12138/dsh-voice
 
 # 2. (可选,想要离线原生识别)安装识别运行时
 dsh plugin --profile web add sherpa-onnx-node
@@ -62,8 +62,8 @@ dsh web
 
 | 现象 | 处理 |
 |---|---|
-| 没看到 🎤 | 确认 `dsh plugin --profile web list` 含 dsh-voice,并重启 dsh web |
-| /voice.ping 返回 native:false | modelDir 未配置/模型文件缺失,或 sherpa-onnx-node 没装进该 profile |
+| 没看到 🎤 | 确认 `dsh plugin --profile web list` 含 @nn12138/dsh-voice,并重启 dsh web |
+| /voice.ping 返回 native:false | modelDir 未配置/模型缺失、sherpa-onnx-node 没装,或 engine: browser 显式关闭 |
 | 点击没反应 | 检查浏览器麦克风权限;F12 看 [dsh-voice] 日志 |
 | 中文输入法吃掉 Ctrl+Space | 换 hotkey,如 alt+m |
 

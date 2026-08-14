@@ -55,4 +55,20 @@ describe('RpcRecognizer(client 半 → host ASR)', () => {
     await rec.pushChunk('AAAA', false)
     expect(errors).toEqual(['host down'])
   })
+
+  it('final 交付本轮累计定稿全文(替换式,双引擎语义统一)', async () => {
+    const { rpc } = fakeRpc([
+      { delta: '你好', final: false },
+      { delta: '第一句', final: true },
+      { delta: '第二句', final: true },
+    ])
+    const rec = new RpcRecognizer(rpc, 'sess-1')
+    const finals: string[] = []
+    rec.onText((text, final) => { if (final) finals.push(text) })
+    await rec.start()
+    await rec.pushChunk('AAAA', false)
+    await rec.pushChunk('BBBB', true)
+    await rec.pushChunk('CCCC', true)
+    expect(finals).toEqual(['第一句', '第一句第二句'])
+  })
 })

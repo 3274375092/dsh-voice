@@ -1,13 +1,13 @@
 {
-  "name": "dsh-voice",
-  "version": "0.1.0",
+  "name": "@nn12138/dsh-voice",
+  "version": "0.2.0",
   "description": "DeepSeek Harness 语音输入插件:麦克风 → 本地/浏览器识别 → 文本进会话(纯输入,与 agent preset 解耦)",
   "type": "module",
   "main": "./lib/index.js",
-  "types": "./lib/types/index.d.ts",
+  "types": "./lib/index.d.ts",
   "exports": {
     ".": {
-      "types": "./lib/types/index.d.ts",
+      "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
     "./client": {
@@ -32,6 +32,7 @@
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.18",
     "react": "^19.2.8",
+    "tsdown": "^0.22.14",
     "typescript": "^5.8.0",
     "vitest": "^3.0.0"
   },
@@ -49,11 +50,9 @@
     "lib/**/*",
     "cordis.patch.yml",
     "USAGE.md",
+    "INSTALL.md",
     "tools/"
   ],
-  "dependencies": {
-    "sherpa-onnx-node": "^1.13.5"
-  },
   "license": "MIT",
   "keywords": [
     "deepseek-harness",
@@ -74,5 +73,8 @@
   },
   "bin": {
     "dsh-voice-models": "./tools/download-models.cjs"
+  },
+  "optionalDependencies": {
+    "sherpa-onnx-node": "^1.13.5"
   }
 }

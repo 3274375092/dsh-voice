@@ -9,7 +9,7 @@
 ```sh
 # 1. 把插件装进 web profile(包声明 dsh.bundle,会自动进 bundles 层)
 dsh plugin --profile web add D:/code/deepseek-harness/scratch-plugin/dsh-voice
-#    ↑ 换成你自己的路径;发布 npm 后就是: dsh plugin --profile web add dsh-voice
+#    ↑ 换成你自己的路径;发布 npm 后就是: dsh plugin --profile web add @nn12138/dsh-voice
 
 # 2. 装原生识别运行时(想要离线识别才需要;浏览器在线识别可跳过)
 dsh plugin --profile web add sherpa-onnx-node
@@ -24,7 +24,8 @@ dsh plugin --profile web add sherpa-onnx-node
 ```yaml
 - id: voice
   config:
-    engine: auto        # auto(默认) | native(强制离线识别) | browser(强制 Web Speech)
+    engine: auto        # auto(默认,ping 探测) | native(强制离线识别) | browser(强制 Web Speech)
+    # 两半共用这一行 config,host 半同样接受这三个值(auto = 有模型就提供 native)
     modelDir: 'D:/code/voxelf/assets/models'   # native 识别模型目录
     asrDir: 'asr-zh-en-2025'   # ASR 模型子目录: asr-zh(纯中文,默认)| asr-zh-en-2025(中英双语)
 ```

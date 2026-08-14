@@ -1,8 +1,6 @@
-const fs = require('fs')
-const WAV = 'D:/code/voxelf/assets/models/asr-zh/test.wav'
-const buf = fs.readFileSync(WAV)
-const data = buf.subarray(44)
-const int16 = new Int16Array(data.buffer, data.byteOffset, Math.floor(data.byteLength / 2))
+const { wavInt16, toB64 } = require('./lib.cjs')
+const WAV = process.env.DSH_VOICE_TEST_WAV || 'D:/code/voxelf/assets/models/asr-zh/test.wav'
+const int16 = wavInt16(WAV)
 
 async function rpc(method, payload, channel) {
   const res = await fetch('http://127.0.0.1:' + (process.env.PORT || '3180') + '/' + channel + '/' + method, {
@@ -11,13 +9,6 @@ async function rpc(method, payload, channel) {
     body: JSON.stringify({ type: 'client-request', rpcId: 'asr-' + Math.random(), method, payload }),
   })
   return res.json()
-}
-function toB64(i16) {
-  const bytes = new Uint8Array(i16.buffer, i16.byteOffset, i16.byteLength)
-  let bin = ''
-  const CH = 0x8000
-  for (let i = 0; i < bytes.length; i += CH) bin += String.fromCharCode(...bytes.subarray(i, i + CH))
-  return Buffer.from(bin, 'binary').toString('base64')
 }
 ;(async () => {
   const created = await rpc('session.create', { cwd: 'D:/code/deepseek-harness' }, 'api')

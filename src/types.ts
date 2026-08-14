@@ -14,6 +14,7 @@ export interface VoicePingResponse {
 
 /** /voice.asr: 一段麦克风 PCM(Int16 16kHz 单声道,base64)。 */
 export interface AsrChunkPayload {
+  /** 归属会话(host 按它隔离识别状态,并发会话不串音) */
   sessionId: string
   audio: string
   /** 最后一段(触发定稿冲刷) */
