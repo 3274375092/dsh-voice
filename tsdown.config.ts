@@ -34,7 +34,7 @@ export default defineConfig({
   },
   outputOptions: {
     entryFileNames: 'client.js',
-    banner: 'window.__ModuleLoader__.load({ id: "dsh-voice", factory: (require) => {',
+    banner: 'window.__ModuleLoader__.load({ id: "@nn12138/dsh-voice", factory: (require) => {',
     footer: 'return module.exports; } });',
     intro: 'var module = { exports: {} }; var exports = module.exports;',
   },
