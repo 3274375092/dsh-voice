@@ -10,7 +10,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/dsh-client-connection'
 import { OnnxModel, type AsrModelOptions, type OnnxSession } from './core/native-asr.js'
-import type { AsrChunkPayload, AsrChunkResponse, VoicePingResponse } from './types.js'
+import type { AsrChunkPayload, AsrChunkResponse, VoiceClientConfig, VoicePingResponse } from './types.js'
 
 export const name = 'dsh-voice-host'
 export const inject = ['connection']
@@ -20,7 +20,8 @@ const MAX_SESSIONS = 4
 
 /** host 半配置:引擎开关 + 模型选项(modelDir/asrDir/vadThreshold/tailPadSeconds
  * 与 AsrModelOptions 共享形状,单一来源,不再逐字段透传)。
- * engine 与 client 半共用同一行 config:两半 schema 都接受 auto ——
+ * engine/hotkey 与 client 半共用同一行 config:web shell 不会把行内 config
+ * 传给 client apply,由 host 经 /voice.config loopback RPC 同步。
  * host 半的 auto = 有模型就提供 native(探测逻辑在 client 半)。 */
 export interface Config extends Pick<AsrModelOptions, 'modelDir' | 'asrDir' | 'vadThreshold' | 'tailPadSeconds'> {
   /** 'browser' = 强制关闭原生识别;'native'/'auto' = 有模型就提供原生识别 */
@@ -31,14 +32,17 @@ export interface Config extends Pick<AsrModelOptions, 'modelDir' | 'asrDir' | 'v
   tailPadSeconds: number
   /** ASR 模型子目录: asr-zh(纯中文,默认)| asr-zh-en-2025(中英双语) */
   asrDir: string
+  /** 全局快捷键(host 只负责镜像给 client;真实消费方在浏览器半) */
+  hotkey: string
 }
 
 export const Config: z<Config> = z.object({
-  engine: z.union([z.const('browser'), z.const('native'), z.const('auto')]).default('native'),
+  engine: z.union([z.const('browser'), z.const('native'), z.const('auto')]).default('auto'),
   modelDir: z.string().default(''),
   vadThreshold: z.number().min(0).default(0.3),
   tailPadSeconds: z.number().min(0).default(0.6),
   asrDir: z.string().default('asr-zh'),
+  hotkey: z.string().default('ctrl+space'),
 })
 
 export function apply(ctx: Context, config: Config): void {
@@ -95,6 +99,15 @@ export function apply(ctx: Context, config: Config): void {
   ctx.effect(() => ctx.connection.rpc.handle('/voice', async (endpoint, payload) => {
     if (endpoint === 'ping') {
       const value: VoicePingResponse = { ok: true, native: nativeReady() }
+      return { ok: true, value }
+    }
+    if (endpoint === 'config') {
+      // 不把 raw engine 原样下发给 client:显式 native 但模型目录为空/加载
+      // 失败时,退回 auto 让 client 走 ping → Web Speech 兜底,保持零配置
+      // 开箱可用;nativeReady() 为真时才允许强制 native。
+      const engine: VoiceClientConfig['engine'] =
+        config.engine === 'native' && !nativeReady() ? 'auto' : config.engine
+      const value: VoiceClientConfig = { engine, hotkey: config.hotkey }
       return { ok: true, value }
     }
     if (endpoint === 'asr') {

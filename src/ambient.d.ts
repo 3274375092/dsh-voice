@@ -96,7 +96,18 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     useProjection?: unknown
     zone?: unknown
   }
-  export type InjectFace<I> = I
+  export interface HostObservable<T> {
+    getSnapshot(): T
+    subscribe(fn: () => void): () => void
+  }
+  export type HooksSources = Record<string, HostObservable<unknown>>
+  export type SnapshotSelectorHook<T> = <S>(selector: (snapshot: T) => S, eq?: (a: S, b: S) => boolean) => S
+  export type PropsHooks<HS extends HooksSources> = {
+    [N in keyof HS & string as `use${Capitalize<N>}`]:
+    SnapshotSelectorHook<HS[N] extends HostObservable<infer T> ? T : never>
+  }
+  export type InjectFace<I extends object> =
+    I extends { hooks: infer HS extends HooksSources } ? Omit<I, 'hooks'> & PropsHooks<HS> : I
   export interface SlotRegisterOptions {
     name: string
     id: string

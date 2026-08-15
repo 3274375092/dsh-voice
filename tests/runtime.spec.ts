@@ -32,6 +32,19 @@ function makeRuntime(engine: 'browser' | 'native') {
   return { runtime, submitted, sent, f }
 }
 
+function makeAutoRuntime(pingNative: boolean) {
+  const f = fakeRecognizer()
+  const ping = vi.fn(async () => ({ ok: true, value: { ok: true, native: pingNative } }))
+  const ctx = { connection: { rpc: { call: ping } } }
+  const runtime = new VoiceRuntime(ctx as never, { engine: 'auto' }, {
+    createRecognizer: () => f.rec as SpeechRecognizer,
+    capture: async () => ({ stop: vi.fn() }),
+    submit: async () => {},
+    finalizeTimeoutMs: 50,
+  })
+  return { runtime, ping }
+}
+
 function flush(): Promise<void> {
   return new Promise((resolve) => { setTimeout(resolve, 0) })
 }
@@ -93,5 +106,19 @@ describe('VoiceRuntime(定稿语义 + 停麦竞态)', () => {
     await runtime.toggleMic('s2') // 另一会话点停 → 停掉 s1 的轮,提交仍归 s1
     expect(runtime.isListening()).toBe(false)
     expect(sent).toEqual([{ sessionId: 's1', text: '第一段' }])
+  })
+})
+
+describe('VoiceRuntime(auto 引擎探测与零配置兜底)', () => {
+  it('ping 返回 native:false → 使用浏览器识别', async () => {
+    const { runtime, ping } = makeAutoRuntime(false)
+    await expect(runtime.getEngine()).resolves.toBe('browser')
+    expect(ping).toHaveBeenCalledWith('/voice', 'ping', {})
+  })
+
+  it('ping 返回 native:true → 使用原生识别', async () => {
+    const { runtime, ping } = makeAutoRuntime(true)
+    await expect(runtime.getEngine()).resolves.toBe('native')
+    expect(ping).toHaveBeenCalledWith('/voice', 'ping', {})
   })
 })

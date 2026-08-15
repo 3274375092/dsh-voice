@@ -12,6 +12,17 @@ export interface VoicePingResponse {
   native: boolean
 }
 
+/**
+ * /voice.config: host 行内 config 同步到 client 半。
+ * client 插件由 web shell 以 loader.create({ name }) 创建,行内 config 不会
+ * 直接传给 client apply;host 半是唯一能读到该 config 的一方,因此由它经
+ * loopback RPC 把 client 关心的键同步过去。
+ */
+export interface VoiceClientConfig {
+  engine: VoiceEngine
+  hotkey: string
+}
+
 /** /voice.asr: 一段麦克风 PCM(Int16 16kHz 单声道,base64)。 */
 export interface AsrChunkPayload {
   /** 归属会话(host 按它隔离识别状态,并发会话不串音) */

@@ -5,11 +5,10 @@
  * 点按 = 一轮识别(兼作浏览器自动播放策略下麦克风权限的用户手势);
  * 停麦后识别文本经 conversation 服务提交(与打字同路,任何 preset 通用)。
  */
-import { useSyncExternalStore, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { IconStopFill16 } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { InjectFace, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { VoiceRuntime } from './runtime.js'
+import type { HostObservable, InjectFace, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 
 /** 自绘麦克风描边图标(平台图标库无 mic;风格对齐 icons/index.tsx:16×16 描边 1.5)。 */
 export function IconMicrophoneOutline16(): ReactElement {
@@ -22,12 +21,16 @@ export function IconMicrophoneOutline16(): ReactElement {
   )
 }
 
-/** slot inject 面:apply 里按会话注入。 */
+/** slot inject 面:纯数据 + 回调 + 标准 hooks compartment。 */
 export interface VoiceMicInject {
-  runtime: VoiceRuntime
-  sessionId: string
-  /** 快捷键标签(按钮提示用) */
-  hotkey: string
+  /** 开关本轮识别(纯回调;运行时状态经 hooks 只读进入组件) */
+  onToggle: () => void
+  hooks: {
+    listening: HostObservable<boolean>
+    partial: HostObservable<string>
+    /** 快捷键的人类可读标签(host 同步配置后会自动刷新) */
+    hotkey: HostObservable<string>
+  }
 }
 
 export type MicButtonProps =
@@ -35,15 +38,10 @@ export type MicButtonProps =
   InjectFace<VoiceMicInject>
 
 export function MicButton(props: MicButtonProps): ReactElement {
-  const { runtime, sessionId, hotkey } = props
-  const listening = useSyncExternalStore(
-    (cb) => runtime.subscribe(cb),
-    () => runtime.isListening(),
-  )
-  const partial = useSyncExternalStore(
-    (cb) => runtime.subscribe(cb),
-    () => runtime.getPartial(),
-  )
+  const { onToggle } = props
+  const listening = props.useListening(value => value)
+  const partial = props.usePartial(value => value)
+  const hotkey = props.useHotkey(value => value)
 
   return (
     <Button
@@ -57,11 +55,7 @@ export function MicButton(props: MicButtonProps): ReactElement {
         ? (partial !== '' ? '正在听:' + partial + '(点击停止并提交)' : '正在听…点击停止并提交')
         : '语音输入(' + hotkey + ')'}
       style={listening ? { color: 'var(--dsw-alias-danger, #d33)' } : undefined}
-      onClick={() => {
-        void runtime.toggleMic(sessionId).catch((err: unknown) => {
-          console.error('dsh-voice mic:', err)
-        })
-      }}
+      onClick={onToggle}
     />
   )
 }

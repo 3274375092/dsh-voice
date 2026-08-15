@@ -6,9 +6,11 @@
       name: '@nn12138/dsh-voice'
       inject: [connection]
       config:
-        # 缺省 engine:client 半默认 auto(ping 探测),host 半默认 native
-        # (同一行 config 两半各按自己的 schema 校验;engine 枚举两半一致,
-        #  host 半的 auto = 有模型就提供 native)
+        # 行内 config 只传给 host 半;client 半由 host 经 /voice.config
+        # loopback RPC 同步 engine/hotkey。
+        # 缺省 engine:host/client 两半都默认 auto(ping 探测;有模型就 native,
+        # 没有模型就 Web Speech 兜底 —— 保证零配置开箱可用)
         # host 半: native 识别的模型目录(未配置 = 仅浏览器识别,开箱即用;
         #  需要原生识别时在 profile 的 cordis.patch.yml 里覆盖 modelDir)
         modelDir: ''
+        hotkey: 'ctrl+space'

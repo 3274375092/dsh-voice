@@ -28,6 +28,8 @@ dsh-voice-models D:/models/voice     # 或指定目录
     hotkey: 'ctrl+space'
 ```
 
+> `hotkey` / `engine` 写在这里即可生效:host 半会把它们经 `/voice.config` 同步给浏览器半。
+
 ```sh
 # 4. 重启并打开 web UI
 dsh web
@@ -73,8 +75,8 @@ dsh web
 ```sh
 cd scratch-plugin/dsh-voice
 npm login --registry=https://registry.npmjs.org      # 首次
-npm run build                                          # 构建(自动 clean)
-npm publish --registry=https://registry.npmjs.org      # 发布
+npm run build                                          # 可选:显式构建(自动 clean)
+npm publish --registry=https://registry.npmjs.org      # 发布(pack 前会自动跑 prepare 构建)
 ```
 
 > 注意:本机 npm 默认源是 npmmirror(只读镜像),发布必须显式指到 registry.npmjs.org。

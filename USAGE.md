@@ -24,8 +24,8 @@ dsh plugin --profile web add sherpa-onnx-node
 ```yaml
 - id: voice
   config:
-    engine: auto        # auto(默认,ping 探测) | native(强制离线识别) | browser(强制 Web Speech)
-    # 两半共用这一行 config,host 半同样接受这三个值(auto = 有模型就提供 native)
+    engine: auto        # auto(默认,ping 探测) | native(仅离线;模型缺失时回退) | browser(强制 Web Speech)
+    # 行内 config 由 host 半接收;engine 经 /voice.config 同步到浏览器半
     modelDir: 'D:/code/voxelf/assets/models'   # native 识别模型目录
     asrDir: 'asr-zh-en-2025'   # ASR 模型子目录: asr-zh(纯中文,默认)| asr-zh-en-2025(中英双语)
 ```
@@ -41,6 +41,8 @@ dsh plugin --profile web add sherpa-onnx-node
   config:
     hotkey: 'ctrl+space'   # 或 alt+m / ctrl+shift+p 等;输入框聚焦时自动不触发
 ```
+
+> `hotkey` 写在行内 config 即可:host 半启动后经 `/voice.config` 把它同步给浏览器半;插件在 RPC 到达前先用默认 `ctrl+space` 兜底。
 
 > ⚠️ Ctrl+Space 是 Windows 中文输入法的经典切换键。若你的输入法占用:在输入框里打字时插件**不会**拦截(输入框聚焦自动豁免);输入框外若被系统级输入法抢走按键,请换一个组合(如 alt+m)。
 

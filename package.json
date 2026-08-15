@@ -22,13 +22,17 @@
     },
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-runtime"
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-connection"
       ],
       "platform": "web"
     }
   },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
   "devDependencies": {
-    "@deepseek-ai/schemastery": "^3.18.1",
+    "@deepseek-ai/cordis": "^4.0.1",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.18",
     "react": "^19.2.8",
@@ -42,7 +46,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "build": "node -e \"require('fs').rmSync('lib',{recursive:true,force:true})\" && tsc -p tsconfig.json && tsdown --config tsdown.config.ts",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
   "allowScripts": {
     "esbuild": true
@@ -64,7 +68,7 @@
     "mic"
   ],
   "engines": {
-    "node": ">=18"
+    "node": "^22.19.0 || >=24.0.0"
   },
   "publishConfig": {
     "access": "public"

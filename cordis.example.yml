@@ -1,9 +1,18 @@
-# 开发期 overlay 示例(路径按你的机器改):
+# 开发期 overlay 示例。
+# 双面插件必须按包名加载:client 半由 package.json 的 dsh.client 声明 +
+# 构建产物 lib/client.js 进入浏览器图,不能把 src/client/*.ts 当普通
+# loader 行插入(那样 Node 会误加载浏览器代码)。
+#
+# 行内 config 由 host 半接收,再经 /voice.config 同步给 client 半,
+# 因此 engine/hotkey 写在这里对浏览器侧同样生效。
+# 使用前先构建并安装进目标 profile,再叠加本 overlay 覆盖调试配置:
+#   npm run build
+#   dsh plugin --profile web add .
 #   dsh web --patch ./cordis.example.yml
 - insert:
-    - id: voice-host
-      name: '/absolute/path/to/dsh-voice/src/index.ts'
-      inject: [connection]
     - id: voice
-      name: '/absolute/path/to/dsh-voice/src/client/index.ts'
+      name: '@nn12138/dsh-voice'
       inject: [connection]
+      config:
+        modelDir: ''
+        hotkey: 'ctrl+space'

@@ -74,7 +74,7 @@ export class VoiceRuntime {
 
   constructor(
     private readonly ctx: ClientContext,
-    private readonly config: VoiceRuntimeConfig,
+    private config: VoiceRuntimeConfig,
     deps: VoiceRuntimeDeps = {},
   ) {
     this.deps = {
@@ -100,6 +100,16 @@ export class VoiceRuntime {
       this.engine = 'browser' // host 不在 → 降级浏览器引擎
     }
     return this.engine
+  }
+
+  /**
+   * host /voice.config 到达后更新引擎选择。空闲时立即失效解析缓存,
+   * 下一轮从新配置开始;正在识别的一轮不打断。
+   */
+  setEngine(engine: VoiceEngine): void {
+    if (this.config.engine === engine) return
+    this.config = { ...this.config, engine }
+    if (!this.listening) this.engine = null
   }
 
   isListening(): boolean {
@@ -236,6 +246,9 @@ export class VoiceRuntime {
     this.partialText = ''
     this.finalized = false
     this.listening = false
+    // 下一轮重新按当前 config 解析引擎:host /voice.config 即使在上一轮
+    // 识别过程中到达,也会从下一轮开始生效。
+    this.engine = null
     this.notify()
     if (text !== '') await this.deps.submit(target, text)
   }

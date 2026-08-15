@@ -35,6 +35,8 @@ dsh-voice-models            # 一键下载模型(~100MB)→ ./dsh-voice-models
     tailPadSeconds: 0.6              # 尾音补偿时长
 ```
 
+行内 `config` 由 host 半接收;`engine` / `hotkey` 会经 `/voice.config` loopback RPC 自动同步到浏览器半,无需另写 client 配置。
+
 ```sh
 dsh web   # 输入框左侧 🎤 或 Ctrl+Space
 ```
@@ -56,9 +58,9 @@ dsh web   # 输入框左侧 🎤 或 Ctrl+Space
 ## 开发
 
 ```sh
-pnpm install --ignore-workspace   # 独立依赖(不依赖 DSH monorepo)
+pnpm install --ignore-workspace   # 独立依赖(不依赖 DSH monorepo;prepare 会自动构建)
 pnpm test                         # 单测(含真实模型冒烟)
-pnpm typecheck && pnpm build      # 构建(tsc host 半 + tsdown client 半)
+pnpm typecheck && pnpm build      # 显式校验与构建(tsc host 半 + tsdown client 半)
 ```
 
 真实模型烟测默认指向本机 voxelf assets,模型不存在时自动跳过;可用环境变量指到别处:
