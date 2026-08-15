@@ -56,7 +56,7 @@ dsh web   # 输入框左侧 🎤 或 Ctrl+Space
    → conversation 服务提交(与打字同路)
 ```
 
-双引擎:客户端 ping `/voice` 探测 host 原生能力;不可用自动降级浏览器 Web Speech。
+双引擎:host 判定生效引擎(配置 + 模型加载结果),客户端经 `/voice.ping` 消费;原生不可用自动降级浏览器 Web Speech。
 
 ## 开发
 

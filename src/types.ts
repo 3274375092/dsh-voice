@@ -4,12 +4,16 @@
  * 纯语音输入:ping(引擎探测)+ asr(PCM → 识别文本)。
  */
 
-/** /voice.ping: 客户端探测 host 引擎能力(决定用 browser 还是 native 识别)。 */
+/** 解析后的生效引擎(排除 'auto' 配置值)。 */
+export type ResolvedEngine = Exclude<VoiceEngine, 'auto'>
+
+/** /voice.ping: 客户端探测 host 引擎能力(决定用 browser 还是 native 识别)。
+ * 引擎决策由 host 侧完成:host 持有配置与原生能力(模型加载结果),
+ * 把"生效引擎"直接下发;客户端只消费,不再自行解析。
+ * (传输状态由外层 RpcResult 承载,这里不再重复 ok 字段。) */
 export interface VoicePingResponse {
-  /** host 是否可用(通道注册成功即 true) */
-  ok: boolean
-  /** host 是否有 native ASR(模型已就绪) */
-  native: boolean
+  /** 本轮的生效引擎(host 从配置 + 模型加载结果解析) */
+  engine: ResolvedEngine
 }
 
 /**

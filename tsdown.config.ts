@@ -24,11 +24,8 @@ export default defineConfig({
   deps: {
     // 平台模块外部化(浏览器由模块表提供)
     neverBundle: CLIENT_EXTERNALS,
-    // vendored 库必须内联(模块表无此条目)。alwaysBundle 必须显式声明:
-    // tsdown 会默认外部化 package.json dependencies 中的包,仅 onlyBundle
-    // 只做审计,不会改变外部化决策。
-    alwaysBundle: ['@deepseek-ai/schemastery', '@deepseek-ai/cosmokit'],
-    onlyBundle: ['@deepseek-ai/schemastery', '@deepseek-ai/cosmokit'],
+    // client 半已无 vendored 依赖(原 schemastery/cosmokit 随客户端 Config
+    // schema 删除而退出),不再需要 alwaysBundle/onlyBundle。
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify('production'),

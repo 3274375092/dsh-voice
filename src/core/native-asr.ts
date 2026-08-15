@@ -15,11 +15,13 @@
  */
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
+import { DEFAULTS } from './config.js'
 
 /** ESM 产物下的 CJS 动态加载入口 */
 const require = createRequire(import.meta.url)
 
-/** 原生 ASR 模型选项(host 的 Config 直接 extend 此形状,单一来源,避免逐字段透传) */
+/** 原生 ASR 模型选项(host 的 Config 与其同形;可选字段回退值取 core/config.ts
+ * 的共享 DEFAULTS,单一来源,避免默认值双写)。 */
 export interface AsrModelOptions {
   /** 模型根目录的绝对路径 */
   modelDir: string
@@ -64,7 +66,7 @@ function vadConfig(options: AsrModelOptions): unknown {
   return {
     sileroVad: {
       model: join(options.modelDir, 'vad', 'silero_vad.onnx'),
-      threshold: options.vadThreshold ?? 0.3,
+      threshold: options.vadThreshold ?? DEFAULTS.vadThreshold,
       minSpeechDuration: 0.25,
       minSilenceDuration: options.minSilenceSeconds ?? 0.5,
       windowSize: 512,
@@ -86,7 +88,7 @@ export class OnnxModel {
   private load(): void {
     if (this.recognizer !== null || this.loadFailed) return
     const dir = this.options.modelDir
-    const asrDir = this.options.asrDir ?? 'asr-zh'
+    const asrDir = this.options.asrDir ?? DEFAULTS.asrDir
     const onnx = require('sherpa-onnx-node') as OnnxModuleLike
     this.recognizer = new onnx.OnlineRecognizer({
       featConfig: { sampleRate: 16000, featureDim: 80 },
@@ -179,7 +181,7 @@ export class OnnxSession {
   private pushTail(samples: Float32Array): void {
     this.tailBuf.push(samples)
     this.tailLen += samples.length
-    const cap = Math.round(16000 * (this.options.tailPadSeconds ?? 0.6))
+    const cap = Math.round(16000 * (this.options.tailPadSeconds ?? DEFAULTS.tailPadSeconds))
     while (this.tailLen > cap && this.tailBuf.length > 0) {
       const first = this.tailBuf[0]
       if (first === undefined) break

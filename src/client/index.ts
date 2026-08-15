@@ -6,33 +6,26 @@
  */
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'
-import z from '@deepseek-ai/schemastery'
 import { VoiceRuntime, type VoiceRuntimeConfig } from './runtime.js'
+import { createVoiceService } from './voice-service.js'
 import { hotkeyLabel, parseHotkey, type ParsedHotkey } from './hotkey.js'
 import { Emitter } from '../core/emitter.js'
-import type { VoiceClientConfig, VoiceEngine } from '../types.js'
+import { DEFAULTS, isVoiceEngine } from '../core/config.js'
+import type { VoiceClientConfig } from '../types.js'
 import { MicButton } from './mic-button.js'
 
 export const name = 'dsh-voice'
 export const inject = ['sessions', 'slots', 'connection']
 
-export interface Config {
-  engine: 'auto' | 'browser' | 'native'
-  /** 全局开关麦克风的快捷键,格式 "ctrl+space" / "alt+m" 等 */
-  hotkey: string
-}
-
-export const Config: z<Config> = z.object({
-  engine: z.union([z.const('auto'), z.const('browser'), z.const('native')]).default('auto'),
-  hotkey: z.string().default('ctrl+space'),
-})
-
-
-export function apply(ctx: ClientContext, config: Config): void {
+export function apply(ctx: ClientContext, config: { engine?: unknown; hotkey?: unknown } = {}): void {
   // web shell 用 loader.create({ name }) 创建 client 条目,行内 config 不会
-  // 传给 client apply。这里先用 client 自己的 schema 默认值兜底,再由 host
-  // 半经 /voice.config 把真正生效的行内配置同步回来。
-  const clientConfig: VoiceClientConfig = { engine: config.engine, hotkey: config.hotkey }
+  // 传给 client apply。这里用共享默认值兜底,再由 host 半经 /voice.config
+  // 把真正生效的行内配置同步回来(值守卫在 core/config.ts,host schema
+  // 覆盖不到 RPC 下发的路径)。
+  const clientConfig: VoiceClientConfig = {
+    engine: isVoiceEngine(config.engine) ? config.engine : DEFAULTS.engine,
+    hotkey: typeof config.hotkey === 'string' && config.hotkey.trim() !== '' ? config.hotkey : DEFAULTS.hotkey,
+  }
   const configEvents = new Emitter<[]>()
   const runtime = new VoiceRuntime(ctx, { engine: clientConfig.engine })
 
@@ -90,14 +83,11 @@ export function apply(ctx: ClientContext, config: Config): void {
     return () => document.removeEventListener('keydown', onKey)
   }, 'dsh-voice: global hotkey')
 
-  const isVoiceEngine = (value: unknown): value is VoiceEngine =>
-    value === 'auto' || value === 'browser' || value === 'native'
+  const voice = createVoiceService((channel, endpoint, payload) =>
+    ctx.connection.rpc.call(channel, endpoint, payload))
 
   // 行内 config 只到 host 半;client 半从这里取回真实值并覆盖 schema 默认。
-  void ctx.connection.rpc.call('/voice', 'config', {}).then((res) => {
-    if (!res.ok) return
-    const remote = res.value as Partial<VoiceClientConfig> | undefined
-    if (remote === undefined) return
+  void voice.fetchConfig().then((remote) => {
     if (isVoiceEngine(remote.engine)) {
       clientConfig.engine = remote.engine
       runtime.setEngine(remote.engine)

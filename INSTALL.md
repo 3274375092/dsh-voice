@@ -67,7 +67,7 @@ dsh web
 |---|---|
 | 启动报 `Failed to load plugins ... without registering "@nn12138/dsh-voice" via __ModuleLoader__.load` | 客户端 bundle 注册 id 与包名不一致:重新 `npm run build`,把 `lib/client.js`(及 `.map`)同步到 profile 安装目录后重启;升级到修复版本后无需手工处理 |
 | 没看到 🎤 | 确认 `dsh plugin --profile web list` 含 @nn12138/dsh-voice,并重启 dsh web |
-| /voice.ping 返回 native:false | modelDir 未配置/模型缺失、sherpa-onnx-node 没装,或 engine: browser 显式关闭 |
+| /voice.ping 下发 engine: browser | modelDir 未配置/模型缺失或加载失败、sherpa-onnx-node 没装,或 engine: browser 显式关闭 |
 | 点击没反应 | 检查浏览器麦克风权限;F12 看 [dsh-voice] 日志 |
 | 中文输入法吃掉 Ctrl+Space | 换 hotkey(如 alt+m)并重启 dsh web |
 

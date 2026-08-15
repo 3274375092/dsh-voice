@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { apply, Config } from '../src/client/index'
+import { apply } from '../src/client/index'
 
 vi.mock('@deepseek-ai/dsh-client-ui-primitives', () => ({
   Button: () => null,
@@ -31,9 +31,9 @@ function clientContext(remote: { engine: string; hotkey: string }) {
 }
 
 describe('client 半配置同步(web shell 不传行内 config)', () => {
-  it('apply 先使用默认值,再经 /voice.config 用 host 行内值覆盖 hotkey', async () => {
+  it('apply 先使用共享默认值,再经 /voice.config 用 host 行内值覆盖 hotkey', async () => {
     const { ctx, calls, registrations, mount } = clientContext({ engine: 'browser', hotkey: 'alt+m' })
-    apply(ctx, Config({}))
+    apply(ctx, {})
     mount()
     const before = registrations[0]!.inject!('sess-1').hooks.hotkey.getSnapshot()
     expect(before).toBe('Ctrl+空格')
@@ -45,11 +45,11 @@ describe('client 半配置同步(web shell 不传行内 config)', () => {
     expect(after).toBe('Alt+M')
   })
 
-  it('RPC 失败时保留 client schema 默认值,不抛异常', async () => {
+  it('RPC 失败时保留默认值,不抛异常', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { ctx, registrations, mount } = clientContext({ engine: 'native', hotkey: 'ctrl+space' })
     ctx.connection.rpc.call = async () => { throw new Error('host down') }
-    apply(ctx, Config({}))
+    apply(ctx, {})
     mount()
     await new Promise(resolve => setTimeout(resolve, 0))
 

@@ -24,7 +24,7 @@ dsh plugin --profile web add sherpa-onnx-node
 ```yaml
 - id: voice
   config:
-    engine: auto        # auto(默认,ping 探测) | native(仅离线;模型缺失时回退) | browser(强制 Web Speech)
+    engine: auto        # auto(默认,host 判定:有模型 → native) | native(仅离线;模型缺失时回退) | browser(强制 Web Speech)
     # 行内 config 由 host 半接收;engine 经 /voice.config 同步到浏览器半
     modelDir: 'D:/code/voxelf/assets/models'   # native 识别模型目录
     asrDir: 'asr-zh-en-2025'   # ASR 模型子目录: asr-zh(纯中文,默认)| asr-zh-en-2025(中英双语)
@@ -68,7 +68,7 @@ dsh plugin --profile web add sherpa-onnx-node
 
 | 维度 | auto(默认) | native(host) | browser(Web Speech) |
 |---|---|---|---|
-| 选择方式 | `/voice.ping` 探测:有模型 → native,否则 → browser | 仅离线识别;模型缺失时同样回退 browser | 强制浏览器在线识别 |
+| 选择方式 | host 判定生效引擎:`/voice.ping` 下发(有模型 → native,否则 → browser) | 仅离线识别;模型缺失时同样回退 browser | 强制浏览器在线识别 |
 | 识别 | 视探测结果 | sherpa-onnx zipformer2 + VAD,离线 | 浏览器在线识别,需联网 |
 | 依赖 | 同探测结果 | sherpa-onnx-node + 模型(~100MB) | 无 |
 | 适用 | 零配置、开箱即用 | 隐私/离线优先 | 快速体验 |
@@ -77,7 +77,7 @@ dsh plugin --profile web add sherpa-onnx-node
 
 - **没看到 🎤**:确认 profile 的 bundles 包含 dsh-voice,并重启了 `dsh web`。
 - **点击没反应**:检查浏览器麦克风权限;控制台看 `[dsh-voice]` 前缀日志。
-- **native 不生效**:`/voice.ping` 返回 `native:false` → 检查 modelDir 路径与 sherpa-onnx-node 是否装进同一 profile。
+- **native 不生效**:`/voice.ping` 下发 `engine: browser` → 检查 modelDir 路径与 sherpa-onnx-node 是否装进同一 profile。
 - **说话出不来字**:确保说完后再点一次停止(final 冲刷);浏览器实际采样率 ≠ 16k 时插件会自动重采样。
 - **首次识别慢**:Defender 首次扫 onnxruntime.dll,后续正常。
 

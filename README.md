@@ -57,7 +57,7 @@ Browser captures mic audio (auto-resampled to 16 kHz)
   → conversation service submits the text (same path as typing)
 ```
 
-Engine selection: the client pings `/voice` to probe host-native capability; if unavailable it degrades to browser Web Speech. `/voice.config` carries the row-level `engine`/`hotkey` from host to client.
+Engine selection: the host resolves the effective engine (config + model-load result) and the client consumes it via `/voice.ping` — native unavailable falls back to browser Web Speech. `/voice.config` carries the row-level `engine`/`hotkey` from host to client.
 
 ## Development
 
