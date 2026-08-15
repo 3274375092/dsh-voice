@@ -1,5 +1,7 @@
 # dsh-voice 🎤
 
+**English** | [中文](README.zh.md)
+
 A voice input plugin for DeepSeek Harness: click 🎤 in the web UI (or press a hotkey), speak, and the recognized text is submitted as a normal chat message. **Input only** — it never touches the agent preset/persona, so it behaves like "another input method" in every mode.
 
 [![npm](https://img.shields.io/npm/v/@nn12138/dsh-voice)](https://www.npmjs.com/package/@nn12138/dsh-voice)

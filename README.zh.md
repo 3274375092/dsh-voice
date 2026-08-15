@@ -1,5 +1,7 @@
 # dsh-voice 🎤
 
+[English](README.md) | **中文**
+
 DeepSeek Harness 的语音输入插件:网页里点 🎤(或按快捷键)说话,识别文本作为普通消息提交进会话。**纯输入**,与 agent preset/人设完全解耦,任何模式下都只是"另一种输入法"。
 
 [![npm](https://img.shields.io/npm/v/@nn12138/dsh-voice)](https://www.npmjs.com/package/@nn12138/dsh-voice)
