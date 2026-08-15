@@ -38,7 +38,7 @@ dsh-voice-models            # one-shot model download (~100MB) → ./dsh-voice-m
     engine: auto                     # auto (default) | native | browser
 ```
 
-The row-level `config` is received by the host half. `engine` and `hotkey` are synced to the browser half over the `/voice.config` loopback RPC, so there is no separate client config to write. `auto` probes host native capability: with a model it uses native; without one it falls back to Web Speech, so zero-config users keep working.
+The row-level `config` is received by the host half. `engine` and `hotkey` are synced to the browser half over the `/voice.config` loopback RPC, so there is no separate client config to write. `auto` probes host native capability: with a model it uses native; without one it falls back to Web Speech, so zero-config users keep working. Restart `dsh web` after changing the config.
 
 ```sh
 dsh web   # 🎤 button appears on the left of the composer, or press Ctrl+Space
@@ -62,9 +62,10 @@ Engine selection: the client pings `/voice` to probe host-native capability; if 
 ## Development
 
 ```sh
-pnpm install --ignore-workspace   # standalone deps (no DSH monorepo needed); prepare auto-builds
-pnpm test                         # unit tests (including real-model smoke tests)
-pnpm typecheck && pnpm build      # explicit check & build (tsc host half + tsdown client half)
+pnpm install --ignore-workspace        # standalone deps (no DSH monorepo needed); prepare auto-builds
+pnpm --ignore-workspace test           # unit tests (including real-model smoke tests)
+pnpm --ignore-workspace typecheck      # type check
+pnpm --ignore-workspace build          # build (tsc host half + tsdown client half)
 ```
 
 Real-model smoke tests look for the local `voxelf` assets and skip when absent; override with:

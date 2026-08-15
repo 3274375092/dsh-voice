@@ -8,8 +8,8 @@
 
 ```sh
 # 1. 把插件装进 web profile(包声明 dsh.bundle,会自动进 bundles 层)
-dsh plugin --profile web add D:/code/deepseek-harness/scratch-plugin/dsh-voice
-#    ↑ 换成你自己的路径;发布 npm 后就是: dsh plugin --profile web add @nn12138/dsh-voice
+dsh plugin --profile web add @nn12138/dsh-voice
+#    本地开发调试可改用源码路径: dsh plugin --profile web add D:/.../dsh-voice
 
 # 2. 装原生识别运行时(插件不自动安装;想要离线识别才需要,浏览器在线识别可跳过)
 dsh plugin --profile web add sherpa-onnx-node
@@ -42,7 +42,7 @@ dsh plugin --profile web add sherpa-onnx-node
     hotkey: 'ctrl+space'   # 或 alt+m / ctrl+shift+p 等;输入框聚焦时自动不触发
 ```
 
-> `hotkey` 写在行内 config 即可:host 半启动后经 `/voice.config` 把它同步给浏览器半;插件在 RPC 到达前先用默认 `ctrl+space` 兜底。
+> `hotkey` 写在行内 config 即可:host 半启动后经 `/voice.config` 把它同步给浏览器半;插件在 RPC 到达前先用默认 `ctrl+space` 兜底。**修改配置后需要重启 `dsh web` 才生效。**
 
 > ⚠️ Ctrl+Space 是 Windows 中文输入法的经典切换键。若你的输入法占用:在输入框里打字时插件**不会**拦截(输入框聚焦自动豁免);输入框外若被系统级输入法抢走按键,请换一个组合(如 alt+m)。
 
@@ -66,11 +66,12 @@ dsh plugin --profile web add sherpa-onnx-node
 
 ## 六、引擎选择对照
 
-| 维度 | native(host) | browser(Web Speech) |
-|---|---|---|
-| 识别 | sherpa-onnx zipformer2 + VAD,离线 | 浏览器在线识别,需联网 |
-| 依赖 | sherpa-onnx-node + 模型(~100MB) | 无 |
-| 适用 | 隐私/离线优先 | 快速体验 |
+| 维度 | auto(默认) | native(host) | browser(Web Speech) |
+|---|---|---|---|
+| 选择方式 | `/voice.ping` 探测:有模型 → native,否则 → browser | 仅离线识别;模型缺失时同样回退 browser | 强制浏览器在线识别 |
+| 识别 | 视探测结果 | sherpa-onnx zipformer2 + VAD,离线 | 浏览器在线识别,需联网 |
+| 依赖 | 同探测结果 | sherpa-onnx-node + 模型(~100MB) | 无 |
+| 适用 | 零配置、开箱即用 | 隐私/离线优先 | 快速体验 |
 
 ## 七、常见问题
 
@@ -82,7 +83,6 @@ dsh plugin --profile web add sherpa-onnx-node
 
 ## 八、开发备忘(插件作者)
 
-- 构建顺序:先 `tsc`(host 半 lib/index.js)再 `tsdown --config tsdown.config.ts`(client 半 lib/client.js);tsc 重发会抹掉 client.js,务必按序。
-- 独立测试:`pnpm test`(含 native ASR 冒烟:真实 wav 出中文)。
+- 构建顺序:先 `tsc`(host 半 lib/index.js)再 `tsdown --config tsdown.config.ts`(client 半 lib/client.js);tsc 重发会抹掉 client.js,务必按序。`pnpm --ignore-workspace build` 已封装该顺序。
+- 独立测试:`pnpm --ignore-workspace test`(含 native ASR 冒烟:真实 wav 出中文)。
 - 线协议冒烟(可选):`node tools/asr-smoke.cjs`(对运行中的实例走 /voice.asr 通道)。
-```

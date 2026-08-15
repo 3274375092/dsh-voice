@@ -35,9 +35,10 @@ dsh-voice-models            # 一键下载模型(~100MB)→ ./dsh-voice-models
     hotkey: 'ctrl+space'             # 全局快捷键
     vadThreshold: 0.3                # 越低越不吞句首尾
     tailPadSeconds: 0.6              # 尾音补偿时长
+    engine: auto                     # auto(默认) | native | browser
 ```
 
-行内 `config` 由 host 半接收;`engine` / `hotkey` 会经 `/voice.config` loopback RPC 自动同步到浏览器半,无需另写 client 配置。
+行内 `config` 由 host 半接收;`engine` / `hotkey` 会经 `/voice.config` loopback RPC 自动同步到浏览器半,无需另写 client 配置。`auto` 会先探测 host 原生能力:有模型用 native,无模型自动回退 Web Speech,保证零配置可用。修改配置后重启 `dsh web`。
 
 ```sh
 dsh web   # 输入框左侧 🎤 或 Ctrl+Space
@@ -60,9 +61,10 @@ dsh web   # 输入框左侧 🎤 或 Ctrl+Space
 ## 开发
 
 ```sh
-pnpm install --ignore-workspace   # 独立依赖(不依赖 DSH monorepo;prepare 会自动构建)
-pnpm test                         # 单测(含真实模型冒烟)
-pnpm typecheck && pnpm build      # 显式校验与构建(tsc host 半 + tsdown client 半)
+pnpm install --ignore-workspace        # 独立依赖(不依赖 DSH monorepo;prepare 会自动构建)
+pnpm --ignore-workspace test           # 单测(含真实模型冒烟)
+pnpm --ignore-workspace typecheck      # 类型检查
+pnpm --ignore-workspace build          # 构建(tsc host 半 + tsdown client 半)
 ```
 
 真实模型烟测默认指向本机 voxelf assets,模型不存在时自动跳过;可用环境变量指到别处:

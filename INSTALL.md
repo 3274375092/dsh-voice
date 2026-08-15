@@ -2,7 +2,7 @@
 
 > 仓库: https://github.com/3274375092/dsh-voice
 
-## 一键安装(已发布到 npm 后)
+## 一键安装(从 npm 安装)
 
 ```sh
 # 0. 前置: 已安装 DeepSeek Harness CLI(npm i -g @deepseek-ai/dsh 或官方安装方式)
@@ -26,9 +26,10 @@ dsh-voice-models D:/models/voice     # 或指定目录
   config:
     modelDir: './dsh-voice-models'     # 或 voxelf 用户的 'D:/code/voxelf/assets/models'
     hotkey: 'ctrl+space'
+    engine: auto                       # auto(默认) | native | browser
 ```
 
-> `hotkey` / `engine` 写在这里即可生效:host 半会把它们经 `/voice.config` 同步给浏览器半。
+> `hotkey` / `engine` 写在这里即可生效:host 半会把它们经 `/voice.config` 同步给浏览器半。`engine: auto` 时无模型会自动回退 Web Speech;修改配置后重启 `dsh web`。
 
 ```sh
 # 4. 重启并打开 web UI
@@ -68,7 +69,7 @@ dsh web
 | 没看到 🎤 | 确认 `dsh plugin --profile web list` 含 @nn12138/dsh-voice,并重启 dsh web |
 | /voice.ping 返回 native:false | modelDir 未配置/模型缺失、sherpa-onnx-node 没装,或 engine: browser 显式关闭 |
 | 点击没反应 | 检查浏览器麦克风权限;F12 看 [dsh-voice] 日志 |
-| 中文输入法吃掉 Ctrl+Space | 换 hotkey,如 alt+m |
+| 中文输入法吃掉 Ctrl+Space | 换 hotkey(如 alt+m)并重启 dsh web |
 
 ## 开发者发布(插件作者)
 
