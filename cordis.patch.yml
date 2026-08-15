@@ -1,13 +1,14 @@
-# 安装期 bundle patch: dsh plugin --profile <name> add ./scratch-plugin/dsh-voice
+# 安装期 bundle patch: dsh plugin --profile <name> add @nn12138/dsh-voice
 # 后由插件声明(dsh.bundle.patch)自动加入 layer 栈。
 # 纯语音输入插件:与 agent preset/人设完全解耦。
 - insert:
     - id: voice
-      name: 'dsh-voice'
+      name: '@nn12138/dsh-voice'
       inject: [connection]
       config:
         # 缺省 engine:client 半默认 auto(ping 探测),host 半默认 native
         # (同一行 config 两半各按自己的 schema 校验;engine 枚举两半一致,
         #  host 半的 auto = 有模型就提供 native)
-        # host 半: native 识别的模型目录(复用 voxelf assets;未配置 = 仅浏览器识别)
-        modelDir: 'D:/code/voxelf/assets/models'
+        # host 半: native 识别的模型目录(未配置 = 仅浏览器识别,开箱即用;
+        #  需要原生识别时在 profile 的 cordis.patch.yml 里覆盖 modelDir)
+        modelDir: ''

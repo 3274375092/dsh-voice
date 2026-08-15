@@ -9,8 +9,8 @@
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/dsh-client-connection'
-import { OnnxModel, type AsrModelOptions, type OnnxSession } from './core/native-asr'
-import type { AsrChunkPayload, AsrChunkResponse, VoicePingResponse } from './types'
+import { OnnxModel, type AsrModelOptions, type OnnxSession } from './core/native-asr.js'
+import type { AsrChunkPayload, AsrChunkResponse, VoicePingResponse } from './types.js'
 
 export const name = 'dsh-voice-host'
 export const inject = ['connection']

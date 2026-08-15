@@ -9,7 +9,7 @@ import { useSyncExternalStore, type ReactElement } from 'react'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import { IconStopFill16 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { VoiceRuntime } from './runtime'
+import type { VoiceRuntime } from './runtime.js'
 
 /** 自绘麦克风描边图标(平台图标库无 mic;风格对齐 icons/index.tsx:16×16 描边 1.5)。 */
 export function IconMicrophoneOutline16(): ReactElement {

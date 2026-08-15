@@ -7,9 +7,9 @@
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-ui-slots'
 import z from '@deepseek-ai/schemastery'
-import { VoiceRuntime, type VoiceRuntimeConfig } from './runtime'
-import { hotkeyLabel, parseHotkey } from './hotkey'
-import { MicButton } from './mic-button'
+import { VoiceRuntime, type VoiceRuntimeConfig } from './runtime.js'
+import { hotkeyLabel, parseHotkey } from './hotkey.js'
+import { MicButton } from './mic-button.js'
 
 export const name = 'dsh-voice'
 export const inject = ['sessions', 'slots', 'connection']

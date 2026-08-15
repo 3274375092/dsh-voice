@@ -16,7 +16,7 @@
  * host 侧 OnnxModel/OnnxSession 不填此接口:结果经 feed() 返回值交付
  * (见 core/native-asr.ts),一份数据只走一条通道。
  */
-import { Emitter } from './emitter'
+import { Emitter } from './emitter.js'
 
 export interface SpeechRecognizer {
   start(): Promise<void>

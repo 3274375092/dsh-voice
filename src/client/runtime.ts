@@ -19,9 +19,9 @@
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type { ConversationService } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { RpcRecognizer, WebSpeechRecognizer, type FlushableRecognizer, type SpeechRecognizer } from '../core/asr'
-import { Emitter } from '../core/emitter'
-import type { AsrChunkPayload, AsrChunkResponse, VoiceEngine, VoicePingResponse } from '../types'
+import { RpcRecognizer, WebSpeechRecognizer, type FlushableRecognizer, type SpeechRecognizer } from '../core/asr.js'
+import { Emitter } from '../core/emitter.js'
+import type { AsrChunkPayload, AsrChunkResponse, VoiceEngine, VoicePingResponse } from '../types.js'
 
 export interface VoiceRuntimeConfig {
   /** 'auto' = ping host 探测;'browser'/'native' 强制 */
