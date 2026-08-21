@@ -62,11 +62,14 @@ Engine selection: the host resolves the effective engine (config + model-load re
 ## Development
 
 ```sh
-pnpm install --ignore-workspace        # standalone deps (no DSH monorepo needed); prepare auto-builds
+pnpm install --ignore-workspace        # standalone deps (no DSH monorepo needed); no install-time scripts
 pnpm --ignore-workspace test           # unit tests (including real-model smoke tests)
 pnpm --ignore-workspace typecheck      # type check
 pnpm --ignore-workspace build          # build (tsc host half + tsdown client half)
+pnpm --ignore-workspace verify:package # pack-level checks: scripts-free install, complete runtime files
 ```
+
+The build only ever runs on the publisher's side (`prepack` — at `npm pack`/`npm publish` time) and in CI before release; consumers installing `@nn12138/dsh-voice` from the registry never execute lifecycle scripts, so `--ignore-scripts` installs are complete and usable (see issue #2).
 
 Real-model smoke tests look for the local `voxelf` assets and skip when absent; override with:
 `DSH_VOICE_MODEL_DIR` (model directory) / `DSH_VOICE_TEST_WAV` (test wav) / `DSH_VOICE_DOWNLOADED_MODELS` (downloaded model directory).

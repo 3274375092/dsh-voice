@@ -76,8 +76,15 @@ dsh web
 ```sh
 cd scratch-plugin/dsh-voice
 npm login --registry=https://registry.npmjs.org      # 首次
-npm run build                                          # 可选:显式构建(自动 clean)
-npm publish --registry=https://registry.npmjs.org      # 发布(pack 前会自动跑 prepare 构建)
+npm run build                                          # 构建(自动 clean;本地发布前建议先跑)
+node scripts/verify-package.cjs                       # 发布包校验:无安装期脚本 + 产物完整
+npm publish --registry=https://registry.npmjs.org      # 发布(prepack 自动构建;消费者安装不跑任何脚本)
 ```
 
 > 注意:本机 npm 默认源是 npmmirror(只读镜像),发布必须显式指到 registry.npmjs.org。
+
+推荐走 CI 发布:推送 `v<版本号>` 标签(如 `v0.2.6`)触发 `.github/workflows/release.yml`,在 CI 内完成
+构建 → 校验(`scripts/verify-package.cjs`)→ `npm publish --ignore-scripts --provenance`,
+发布的是 CI 构建产物且带供应链签名;需先在仓库 secrets 配置 `NPM_TOKEN`。
+发布包不再包含任何安装期生命周期脚本(`prepare` 已于 0.2.6 移除,构建只在发布方侧 `prepack` 执行),
+`--ignore-scripts` 安装后插件可正常加载(issue #2)。

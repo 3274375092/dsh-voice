@@ -1,8 +1,9 @@
 {
   "name": "@nn12138/dsh-voice",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Voice input plugin for DeepSeek Harness: microphone → local/browser speech recognition → text submitted as a normal chat message (input-only, preset-agnostic)",
   "type": "module",
+  "packageManager": "pnpm@11.21.0",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "exports": {
@@ -46,10 +47,16 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "build": "node -e \"require('fs').rmSync('lib',{recursive:true,force:true})\" && tsc -p tsconfig.json && tsdown --config tsdown.config.ts",
-    "prepare": "npm run build"
+    "verify:package": "node scripts/verify-package.cjs",
+    "prepack": "npm run build"
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   },
   "files": [
     "lib/**/*",

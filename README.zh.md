@@ -61,11 +61,14 @@ dsh web   # 输入框左侧 🎤 或 Ctrl+Space
 ## 开发
 
 ```sh
-pnpm install --ignore-workspace        # 独立依赖(不依赖 DSH monorepo;prepare 会自动构建)
+pnpm install --ignore-workspace        # 独立依赖(不依赖 DSH monorepo;无安装期脚本)
 pnpm --ignore-workspace test           # 单测(含真实模型冒烟)
 pnpm --ignore-workspace typecheck      # 类型检查
 pnpm --ignore-workspace build          # 构建(tsc host 半 + tsdown client 半)
+pnpm --ignore-workspace verify:package # 发布包校验:无安装期脚本、产物完整、--ignore-scripts 可安装
 ```
+
+构建只发生在发布方侧(`prepack` — `npm pack`/`npm publish` 时)与 CI 发布前;消费者从 registry 安装 `@nn12138/dsh-voice` 不会执行任何生命周期脚本,`--ignore-scripts` 安装依然完整可用(见 issue #2)。
 
 真实模型烟测默认指向本机 voxelf assets,模型不存在时自动跳过;可用环境变量指到别处:
 `DSH_VOICE_MODEL_DIR`(模型目录)/ `DSH_VOICE_TEST_WAV`(测试 wav)/ `DSH_VOICE_DOWNLOADED_MODELS`(下载模型目录)。
