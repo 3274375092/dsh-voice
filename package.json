@@ -23,7 +23,6 @@
     },
     "client": {
       "inject": [
-        "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-connection"
       ],
       "platform": "web"
@@ -48,6 +47,9 @@
     "typecheck": "tsc --noEmit",
     "build": "node -e \"require('fs').rmSync('lib',{recursive:true,force:true})\" && tsc -p tsconfig.json && tsdown --config tsdown.config.ts",
     "verify:package": "node scripts/verify-package.cjs",
+    "verify:types": "node scripts/verify-real-types.mjs",
+    "verify:runtime": "node scripts/verify-runtime.mjs",
+    "verify": "npm run verify:types && npm run build && npm run verify:runtime && npm run test && npm run verify:package",
     "prepack": "npm run build"
   },
   "allowScripts": {

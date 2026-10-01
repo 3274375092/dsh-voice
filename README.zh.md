@@ -63,12 +63,27 @@ dsh web   # 输入框左侧 🎤 或 Ctrl+Space
 ```sh
 pnpm install --ignore-workspace        # 独立依赖(不依赖 DSH monorepo;无安装期脚本)
 pnpm --ignore-workspace test           # 单测(含真实模型冒烟)
-pnpm --ignore-workspace typecheck      # 类型检查
+pnpm --ignore-workspace typecheck      # 类型检查(对仓库内结构桩)
 pnpm --ignore-workspace build          # 构建(tsc host 半 + tsdown client 半)
+pnpm --ignore-workspace verify:runtime # 按真实模块表规则加载产物,并驱动两半 apply()
+pnpm --ignore-workspace verify:types   # 对**真实** DSH 安装编译(需 DSH_PACKAGES_DIR)
 pnpm --ignore-workspace verify:package # 发布包校验:无安装期脚本、产物完整、--ignore-scripts 可安装
 ```
 
 构建只发生在发布方侧(`prepack` — `npm pack`/`npm publish` 时)与 CI 发布前;消费者从 registry 安装 `@nn12138/dsh-voice` 不会执行任何生命周期脚本,`--ignore-scripts` 安装依然完整可用(见 issue #2)。
+
+### 跟随 DSH 升级
+
+`typecheck` 跑的是 `src/ambient.d.ts` 里手写的结构桩 —— 这类桩在结构上就**无法**发现 DSH API 漂移(桩描述的是源码当前的假设,等于自己批改自己的卷子)。两个校验补上这个缺口:
+
+- **`verify:runtime`**(不需要 DSH 安装):复刻真实 `client-modules` 解析规则 —— 用线上平台模块表加载 `lib/client.js`,再用贴近发布版 API 形状的 ctx 调用两半 `apply()`。产物若 require 了平台不再 seed 的模块,会在这里失败,而不是在页面加载时悄悄挂掉。
+- **`verify:types`**:**排除** `src/ambient.d.ts` 编译 `src/`,把每个 specifier 解析到某份 DSH 安装里的真实包:
+
+```sh
+DSH_PACKAGES_DIR=<dsh>/node_modules/@deepseek-ai pnpm --ignore-workspace verify:types
+```
+
+未设 `DSH_PACKAGES_DIR` 时它打印 skip 并以 0 退出,CI 无 DSH 检出也能保持绿。发布前请对着目标 DSH 版本跑一次。
 
 真实模型烟测默认指向本机 voxelf assets,模型不存在时自动跳过;可用环境变量指到别处:
 `DSH_VOICE_MODEL_DIR`(模型目录)/ `DSH_VOICE_TEST_WAV`(测试 wav)/ `DSH_VOICE_DOWNLOADED_MODELS`(下载模型目录)。

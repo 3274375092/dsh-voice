@@ -4,3 +4,4 @@ lib/
 *.tsbuildinfo
 .npmrc
 *.part
+.tmp/

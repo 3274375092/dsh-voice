@@ -35,6 +35,18 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # 契约验证:构建产物按真实 client-modules 解析规则加载,
+      # 并驱动 host/client 两半的 apply()(平台模块表 + RPC 端点)
+      - name: Verify runtime contract
+        run: node scripts/verify-runtime.mjs
+
+      # 真实 DSH 类型校验:需要一份 DSH 安装。CI 无安装时自动跳过(exit 0);
+      # 发布前请在装有目标 DSH 的机器上设 DSH_PACKAGES_DIR 本地跑一次。
+      - name: Verify against real DSH types
+        run: node scripts/verify-real-types.mjs
+        env:
+          DSH_PACKAGES_DIR: ${{ vars.DSH_PACKAGES_DIR }}
+
       # issue #2: 校验发布包无安装期脚本(prepare 已移除)、产物完整、
       # 且 --ignore-scripts 安装后加载路径可用
       - name: Verify publishable package

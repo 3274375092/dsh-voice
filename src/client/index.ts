@@ -4,9 +4,9 @@
  * 识别文本经 conversation 服务提交(与打字同路)。另注册全局快捷键
  * (默认 Ctrl+Space)开关麦克风;输入框聚焦时不触发,避免与输入法冲突。
  */
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
-import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'
-import { VoiceRuntime, type VoiceRuntimeConfig } from './runtime.js'
+import type { HostObservable } from '@deepseek-ai/dsh-client-ui-renderer/client'
+import type { VoiceClientContext } from './runtime.js'
+import { VoiceRuntime } from './runtime.js'
 import { createVoiceService } from './voice-service.js'
 import { hotkeyLabel, parseHotkey, type ParsedHotkey } from './hotkey.js'
 import { Emitter } from '../core/emitter.js'
@@ -17,7 +17,7 @@ import { MicButton } from './mic-button.js'
 export const name = 'dsh-voice'
 export const inject = ['sessions', 'slots', 'connection']
 
-export function apply(ctx: ClientContext, config: { engine?: unknown; hotkey?: unknown } = {}): void {
+export function apply(ctx: VoiceClientContext, config: { engine?: unknown; hotkey?: unknown } = {}): void {
   // web shell 用 loader.create({ name }) 创建 client 条目,行内 config 不会
   // 传给 client apply。这里用共享默认值兜底,再由 host 半经 /voice.config
   // 把真正生效的行内配置同步回来(值守卫在 core/config.ts,host schema
@@ -49,7 +49,7 @@ export function apply(ctx: ClientContext, config: { engine?: unknown; hotkey?: u
     name: 'conversation.input.left',
     id: 'voice-mic',
     order: 0,
-    inject: (sessionId) => ({
+    inject: (sessionId: string) => ({
       onToggle: () => {
         void runtime.toggleMic(sessionId).catch((err: unknown) => {
           console.error('dsh-voice mic:', err)

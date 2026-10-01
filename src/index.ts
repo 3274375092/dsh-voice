@@ -108,5 +108,5 @@ export function apply(ctx: Context, config: Config, deps: HostDeps = {}): void {
       default:
         return rpcError('unknown_endpoint', 'unknown endpoint: ' + endpoint)
     }
-  }, { authority: 'loopback' }), 'dsh-voice: /voice rpc channel')
+  }), 'dsh-voice: /voice rpc channel')
 }

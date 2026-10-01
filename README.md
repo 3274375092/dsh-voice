@@ -64,12 +64,27 @@ Engine selection: the host resolves the effective engine (config + model-load re
 ```sh
 pnpm install --ignore-workspace        # standalone deps (no DSH monorepo needed); no install-time scripts
 pnpm --ignore-workspace test           # unit tests (including real-model smoke tests)
-pnpm --ignore-workspace typecheck      # type check
+pnpm --ignore-workspace typecheck      # type check (against the in-repo structural stubs)
 pnpm --ignore-workspace build          # build (tsc host half + tsdown client half)
+pnpm --ignore-workspace verify:runtime # load the built bundle under the real module-table rules, drive both apply() halves
+pnpm --ignore-workspace verify:types   # compile against a REAL DSH install (needs DSH_PACKAGES_DIR)
 pnpm --ignore-workspace verify:package # pack-level checks: scripts-free install, complete runtime files
 ```
 
 The build only ever runs on the publisher's side (`prepack` — at `npm pack`/`npm publish` time) and in CI before release; consumers installing `@nn12138/dsh-voice` from the registry never execute lifecycle scripts, so `--ignore-scripts` installs are complete and usable (see issue #2).
+
+### Keeping up with DSH
+
+`typecheck` runs against the hand-written stubs in `src/ambient.d.ts`, which cannot detect DSH API drift by construction — the stubs describe whatever the source already assumes. Two checks close that gap:
+
+- **`verify:runtime`** (no DSH install needed) replays the real `client-modules` resolution contract: it loads `lib/client.js` through the live platform module table, then calls `apply()` on both halves with contexts shaped like the shipping API. A bundle that requires a module the platform no longer seeds fails here instead of silently at page load.
+- **`verify:types`** compiles `src/` with `src/ambient.d.ts` **excluded**, resolving each specifier to the real packages in a DSH install. Point it at one:
+
+```sh
+DSH_PACKAGES_DIR=<dsh>/node_modules/@deepseek-ai pnpm --ignore-workspace verify:types
+```
+
+It exits 0 with a skip notice when `DSH_PACKAGES_DIR` is unset, so CI stays green without a DSH checkout. Run it before a release against the DSH version you target.
 
 Real-model smoke tests look for the local `voxelf` assets and skip when absent; override with:
 `DSH_VOICE_MODEL_DIR` (model directory) / `DSH_VOICE_TEST_WAV` (test wav) / `DSH_VOICE_DOWNLOADED_MODELS` (downloaded model directory).

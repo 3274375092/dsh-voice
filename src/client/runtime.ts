@@ -16,13 +16,28 @@
  * 单麦克风语义:全局同时只有一轮识别;别的会话点停/快捷键会停掉当前轮,
  * 文本仍提交给开启本轮的那个会话(activeSession)。
  */
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
-import type { ConversationService } from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { Context } from '@deepseek-ai/cordis'
+import type { ClientConnectionRpc, SessionId } from '@deepseek-ai/dsh-client-connection/client'
+import type { IConversation } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { createRecognizer, type SpeechRecognizer } from './asr.js'
 import { createVoiceService, type VoiceService } from './voice-service.js'
 import { Emitter } from '../core/emitter.js'
 import type { ResolvedEngine, VoiceEngine } from '../types.js'
+
+/**
+ * 浏览器半的 ctx.connection 面。0.1.5 起 connection 的 host/client 两面被拆开:
+ * 只有 host 入口(root)augment `Context.connection`,/client 子路径只导出
+ * ConnectionHandle 而不 augment —— 客户端插件因此不能从共享 Context 类型上
+ * 直接读到 .rpc.call。这里按插件真正需要的形状显式声明(唯一成员是 rpc),
+ * 既不依赖全局 augmentation,也不会把 host 面的 HostConnectionRpc 混进来。
+ */
+export interface ClientConnectionFace {
+  readonly rpc: Pick<ClientConnectionRpc, 'call'>
+}
+
+/** cordis Context 上的 connection(由 client-connection /client 在运行时提供)。 */
+export type VoiceClientContext = Context & { connection: ClientConnectionFace }
 
 export interface VoiceRuntimeConfig {
   /** 'auto' = ping host 探测;'browser'/'native' 强制 */
@@ -61,7 +76,7 @@ export class VoiceRuntime {
   }
 
   constructor(
-    private readonly ctx: ClientContext,
+    private readonly ctx: VoiceClientContext,
     private config: VoiceRuntimeConfig,
     deps: VoiceRuntimeDeps = {},
   ) {
@@ -208,10 +223,16 @@ export class VoiceRuntime {
   }
 
   private async submitText(sessionId: string, text: string): Promise<void> {
-    const scope = this.ctx.sessions.scope(sessionId)
+    // SessionId 是 branded string:slot inject 面与 wire 只交付裸字符串,
+    // 品牌只在这一处服务边界兑现(scope() 是唯一需要它的调用)。
+    const scope = this.ctx.sessions.scope(sessionId as SessionId)
     if (scope === undefined) return
-    const conversation = scope.get<ConversationService>('conversation')
+    // conversation 由 dsh-client-ui-conversation/client 在 Agent scope 上提供,
+    // 类型经该包的 Context augmentation 直达(不再走泛型 get,免得名称失配)。
+    const conversation: IConversation | undefined = scope.conversation
     if (conversation === undefined) return
-    conversation.send(text)
+    // IConversation.send 自 0.1.5 起返回 Promise<void>,业务失败会 reject;
+    // await 让失败沿 stopMic 传播给调用方,不再变成 unhandled rejection。
+    await conversation.send(text)
   }
 }

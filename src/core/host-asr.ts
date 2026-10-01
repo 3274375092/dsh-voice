@@ -12,7 +12,7 @@
  * 被逐出的会话若还在说话,VAD 状态从零开始、一句话会被拆断 ——
  * 这是有意的容量取舍(防 VAD 状态无界累积),非 bug。
  */
-import type { RpcResult } from '@deepseek-ai/dsh-client-connection'
+import type { ConnectionRpcResult } from '@deepseek-ai/dsh-client-connection'
 import { rpcError } from './wire.js'
 import type { AsrChunkPayload, AsrChunkResponse } from '../types.js'
 
@@ -49,7 +49,7 @@ export class HostAsr {
   }
 
   /** 处理一块 asr payload:解码 → 会话池取会话 → feed → 线协议结果。 */
-  handle(model: AsrModelFace, req: AsrChunkPayload): RpcResult<AsrChunkResponse> {
+  handle(model: AsrModelFace, req: AsrChunkPayload): ConnectionRpcResult<AsrChunkResponse> {
     const session = this.sessionFor(model, req.sessionId)
     if (session === null) {
       return rpcError('native_unavailable', 'native ASR 不可用')

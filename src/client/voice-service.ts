@@ -7,11 +7,11 @@
  * call 注入(测试第二个 adapter):(channel, endpoint, payload) → RpcResult。
  * 错误:ok:false → 抛 VoiceRpcError(保留 code);传输异常原样传播。
  */
-import type { RpcResult } from '@deepseek-ai/dsh-client-connection'
+import type { ConnectionRpcResult } from '@deepseek-ai/dsh-client-connection'
 import { VOICE_CHANNEL, VOICE_ENDPOINTS, VoiceRpcError } from '../core/wire.js'
 import type { AsrChunkPayload, AsrChunkResponse, VoiceClientConfig, VoicePingResponse } from '../types.js'
 
-export type RpcCall = (channel: string, endpoint: string, payload: unknown) => Promise<RpcResult<unknown>>
+export type RpcCall = (channel: string, endpoint: string, payload: unknown) => Promise<ConnectionRpcResult<unknown>>
 
 export interface VoiceService {
   ping(): Promise<VoicePingResponse>
@@ -19,7 +19,7 @@ export interface VoiceService {
   asr(payload: AsrChunkPayload): Promise<AsrChunkResponse>
 }
 
-function decode<T>(res: RpcResult<unknown>): T {
+function decode<T>(res: ConnectionRpcResult<unknown>): T {
   if (!res.ok) throw new VoiceRpcError(res.error.code, res.error.message)
   return res.value as T
 }

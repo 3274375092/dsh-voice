@@ -35,3 +35,36 @@ _Avoid_: interim、临时文本
 **自然结束 (natural end)**:
 识别器自行判定语音结束而结束轮次(仅浏览器引擎存在);原生引擎只能由用户点停。
 _Avoid_: auto-stop
+
+## DSH 兼容性
+
+插件跟随 DSH 0.1.5-rc.1 的 API。以下三条是**有意的结构决策**,改动前请先读:
+
+**连接面显式声明 (explicit connection face)**:
+`connection` 的 host/client 两面在 0.1.5 被拆开:只有 host 入口(root)augment
+`Context.connection`,而 `/client` 子路径导出 `ClientConnectionRpc` / `ConnectionHandle`
+却**不** augment Context。因此客户端插件不能从共享 `Context` 类型上读到 `.rpc.call`,
+也**不应**自己 augment(会把 host 面的 `HostConnectionRpc` 撞进来)。
+插件按自己真正需要的形状声明 `ClientConnectionFace`(唯一成员 `rpc`),见 `src/client/runtime.ts`。
+_Avoid_: 全局 augment Context.connection、`as any` 绕过
+
+**结构桩不是兼容性证据 (stubs are not evidence)**:
+`src/ambient.d.ts` 是 out-of-tree 独立 typecheck 用的手写结构桩,结构上就不可能发现
+DSH 漂移 —— 桩描述的是源码当前的假设。真正的兼容性证据来自 `verify:runtime`
+(按线上模块表加载产物并驱动两半 `apply()`)与 `verify:types`(排除桩、对真实 DSH 编译)。
+_Avoid_: 以 `typecheck` 通过作为"适配最新 DSH"的结论
+
+**会话服务名 (session service names)**:
+浏览器半的会话服务接口是 `IConversation`(0.1.5 前叫 `ConversationService`),
+`send()` 返回 `Promise<void>` 且业务失败会 reject —— 调用方必须 await,
+否则失败变成 unhandled rejection。会话列表来自 `ctx.sessions`
+(由 `dsh-api-session-controller/client` 提供),当前选中项是 `list.getSnapshot().current`。
+_Avoid_: ConversationService、fire-and-forget 的 send()
+
+**平台模块表 (platform module table)**:
+浏览器半的 bundle 只能 require 平台 seed 表中的模块(当前 9 项:react 四件套、
+cordis、client-store、ui-slots、ui-primitives、ui-dockkit)。其余 `@deepseek-ai/*`
+引用必须写成 `import type`(构建期擦除),否则运行时 `require()` 会 miss 模块表。
+`package.json` 的 `dsh.client.inject` 仅是信息性字段,不建图边;`external` 才建边。
+_Avoid_: 在 client 半 import 平台表外的**值**(非 type)
+
